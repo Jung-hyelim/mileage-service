@@ -3,9 +3,6 @@ package com.example.mileage.service;
 import com.example.mileage.dto.TotalMileageDto;
 import com.example.mileage.enums.EventAction;
 import com.example.mileage.enums.EventType;
-import com.example.mileage.repository.MileageHistoryRepository;
-import com.example.mileage.repository.MileageRepository;
-import com.example.mileage.repository.PlaceFirstReviewRepository;
 import com.example.mileage.vo.MileageRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -13,8 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Arrays;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
 @SpringBootTest
@@ -104,7 +99,7 @@ class MileageServiceTest {
     @Test
     public void 마일리지조회() {
         String userId = "user_id_uuid_1";
-        TotalMileageDto mileages = mileageService.getMileages(userId);
+        TotalMileageDto mileages = mileageService.getUserTotalMileage(userId);
         log.info("마일리지 조회 결과 userId={}, totalMileage={}", userId, mileages);
     }
 

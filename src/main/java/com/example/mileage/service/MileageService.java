@@ -102,7 +102,7 @@ public class MileageService {
         }
     }
 
-    public TotalMileageDto getMileages(String userId) {
+    public TotalMileageDto getUserTotalMileage(String userId) {
         // 마일리지 리스트 조회
         List<Mileage> mileageList = mileageRepository.findAllByUserId(userId);
 
