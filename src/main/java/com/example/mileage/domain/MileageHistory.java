@@ -1,6 +1,8 @@
 package com.example.mileage.domain;
 
+import com.example.mileage.dto.MileageDto;
 import com.example.mileage.enums.EventAction;
+import com.example.mileage.vo.MileageRequest;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
@@ -10,10 +12,10 @@ import javax.persistence.*;
  * mileage_history : 마일리지 증감 히스토리 테이블 <br>
  * - 이벤트가 발생할 때마다 포인트 변화 이력을 저장한다. <br>
  */
-@Entity
-@Table(name = "mileage_history")
 @NoArgsConstructor
 @ToString
+@Entity
+@Table(name = "mileage_history")
 public class MileageHistory extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,10 +40,10 @@ public class MileageHistory extends BaseTimeEntity {
     @Column
     private Integer firstPlaceReviewPoint;
 
-    public MileageHistory(EventAction action, Mileage mileage) {
-        this.action = action;
-        this.userId = mileage.getUserId();
-        this.reviewId = mileage.getReviewId();
+    public MileageHistory(MileageRequest request) {
+        this.action = request.getAction();
+        this.userId = request.getUserId();
+        this.reviewId = request.getReviewId();
     }
 
     public MileageHistory calculatePointByAddAction(Mileage mileage) {
@@ -51,7 +53,7 @@ public class MileageHistory extends BaseTimeEntity {
         return this;
     }
 
-    public MileageHistory calculatePointByModAction(Mileage oldMileage, Mileage newMileage) {
+    public MileageHistory calculatePointByModAction(MileageDto oldMileage, Mileage newMileage) {
         this.contentReviewPoint = calculateChangedPoint(oldMileage.getHasContentReview(), newMileage.getHasContentReview());
         this.photoReviewPoint = calculateChangedPoint(oldMileage.getHasPhotoReview(), newMileage.getHasPhotoReview());
         this.firstPlaceReviewPoint = calculateChangedPoint(oldMileage.getIsFirstPlaceReview(), newMileage.getIsFirstPlaceReview());
@@ -73,5 +75,10 @@ public class MileageHistory extends BaseTimeEntity {
         else if(hasOldItem && !hasNewItem) return -1;
         else if(!hasOldItem && hasNewItem) return 1;
         return 0;
+    }
+
+    public boolean isChangedPoint() {
+        if(this.contentReviewPoint == 0 && this.photoReviewPoint == 0 && this.firstPlaceReviewPoint == 0) return false;
+        else return true;
     }
 }

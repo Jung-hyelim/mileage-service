@@ -6,19 +6,21 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import javax.persistence.*;
+import java.util.List;
+
 
 /**
  * mileage : 마일리지 <br>
  * - 사용자 리뷰의 마일리지 적립 여부를 저장한다. <br>
  */
+@Getter
+@NoArgsConstructor
+@ToString
 @Entity
 @Table(name = "mileage", indexes = {
         @Index(name = "index_mileage_user_id_place_id", columnList = "userId, placeId", unique = true),  // 사용자는 장소마다 리뷰를 1개만 작성 가능
         @Index(name = "index_mileage_place_id", columnList = "placeId"),
 })
-@NoArgsConstructor
-@Getter
-@ToString
 public class Mileage extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,8 +45,21 @@ public class Mileage extends BaseTimeEntity {
         this.userId = request.getUserId();
         this.reviewId = request.getReviewId();
         this.placeId = request.getPlaceId();
-        this.hasContentReview = !request.getContent().isBlank() && request.getContent().length() >= 1;
-        this.hasPhotoReview = request.getAttachedPhotoIds() != null && request.getAttachedPhotoIds().size() >= 1;
+        this.hasContentReview = hasString(request.getContent());
+        this.hasPhotoReview = hasList(request.getAttachedPhotoIds());
         this.isFirstPlaceReview = isFirstPlaceReview;
+    }
+
+    public void modifyAction(MileageRequest request) {
+        this.hasContentReview = hasString(request.getContent());
+        this.hasPhotoReview = hasList(request.getAttachedPhotoIds());
+    }
+
+    private boolean hasString(String content) {
+        return !content.isBlank() && content.length() >= 1;
+    }
+
+    private boolean hasList(List list) {
+        return list != null && list.size() >= 1;
     }
 }

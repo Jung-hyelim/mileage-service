@@ -16,3 +16,8 @@ spring:
   sql:
     init:
       mode: always
+
+logging:
+  level:
+    com.example.mileage: debug
+    org.hibernate.type.descriptor.sql: trace
