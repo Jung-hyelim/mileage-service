@@ -1,6 +1,7 @@
 package com.example.mileage.controller;
 
 import com.example.mileage.dto.MileageDto;
+import com.example.mileage.dto.TotalMileageDto;
 import com.example.mileage.service.MileageService;
 import com.example.mileage.vo.MileageRequest;
 import com.example.mileage.vo.MileageResponse;
@@ -23,7 +24,7 @@ public class MileageController {
 
     @GetMapping("/v1/mileages/{userId}")
     public MileageResponse getMileages(@PathVariable String userId) {
-        MileageDto mileages = mileageService.getMileages(userId);
+        TotalMileageDto totalMileage = mileageService.getMileages(userId);
         return null;
     }
 }

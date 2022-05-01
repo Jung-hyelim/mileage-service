@@ -4,6 +4,7 @@ import com.example.mileage.domain.Mileage;
 import com.example.mileage.domain.MileageHistory;
 import com.example.mileage.domain.PlaceFirstReview;
 import com.example.mileage.dto.MileageDto;
+import com.example.mileage.dto.TotalMileageDto;
 import com.example.mileage.repository.MileageHistoryRepository;
 import com.example.mileage.repository.MileageRepository;
 import com.example.mileage.repository.PlaceFirstReviewRepository;
@@ -12,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -99,8 +102,22 @@ public class MileageService {
         }
     }
 
-    public MileageDto getMileages(String userId) {
+    public TotalMileageDto getMileages(String userId) {
+        // 마일리지 리스트 조회
+        List<Mileage> mileageList = mileageRepository.findAllByUserId(userId);
 
-        return null;
+        // 포인트 계산
+        int totalPoint = mileageList.stream().mapToInt(mileage -> {
+            int point = 0;
+            if (mileage.getHasContentReview()) point += 1;
+            if (mileage.getHasPhotoReview()) point += 1;
+            if (mileage.getIsFirstPlaceReview()) point += 1;
+            return point;
+        }).sum();
+
+        return TotalMileageDto.builder()
+                .userId(userId)
+                .totalPoint(totalPoint)
+                .build();
     }
 }
