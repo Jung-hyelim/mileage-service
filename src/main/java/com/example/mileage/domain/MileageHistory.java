@@ -1,6 +1,8 @@
 package com.example.mileage.domain;
 
 import com.example.mileage.enums.EventAction;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import javax.persistence.*;
 
@@ -10,6 +12,8 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "mileage_history")
+@NoArgsConstructor
+@ToString
 public class MileageHistory extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,4 +38,40 @@ public class MileageHistory extends BaseTimeEntity {
     @Column
     private Integer firstPlaceReviewPoint;
 
+    public MileageHistory(EventAction action, Mileage mileage) {
+        this.action = action;
+        this.userId = mileage.getUserId();
+        this.reviewId = mileage.getReviewId();
+    }
+
+    public MileageHistory calculatePointByAddAction(Mileage mileage) {
+        this.contentReviewPoint = calculateChangedPoint(false, mileage.getHasContentReview());
+        this.photoReviewPoint = calculateChangedPoint(false, mileage.getHasPhotoReview());
+        this.firstPlaceReviewPoint = calculateChangedPoint(false, mileage.getIsFirstPlaceReview());
+        return this;
+    }
+
+    public MileageHistory calculatePointByModAction(Mileage oldMileage, Mileage newMileage) {
+        this.contentReviewPoint = calculateChangedPoint(oldMileage.getHasContentReview(), newMileage.getHasContentReview());
+        this.photoReviewPoint = calculateChangedPoint(oldMileage.getHasPhotoReview(), newMileage.getHasPhotoReview());
+        this.firstPlaceReviewPoint = calculateChangedPoint(oldMileage.getIsFirstPlaceReview(), newMileage.getIsFirstPlaceReview());
+        return this;
+    }
+
+    public MileageHistory calculatePointByDeleteAction(Mileage mileage) {
+        this.contentReviewPoint = calculateChangedPoint(mileage.getHasContentReview(), false);
+        this.photoReviewPoint = calculateChangedPoint(mileage.getHasPhotoReview(), false);
+        this.firstPlaceReviewPoint = calculateChangedPoint(mileage.getIsFirstPlaceReview(), false);
+        return this;
+    }
+
+    private int calculateChangedPoint(Boolean hasOldItem, Boolean hasNewItem) {
+        if(hasOldItem == null) hasOldItem = false;
+        if(hasNewItem == null) hasNewItem = false;
+
+        if(hasOldItem == hasNewItem) return 0;
+        else if(hasOldItem && !hasNewItem) return -1;
+        else if(!hasOldItem && hasNewItem) return 1;
+        return 0;
+    }
 }

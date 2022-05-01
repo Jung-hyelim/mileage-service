@@ -1,5 +1,9 @@
 package com.example.mileage.domain;
 
+import com.example.mileage.vo.MileageRequest;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
 import javax.persistence.*;
 
 /**
@@ -12,6 +16,8 @@ import javax.persistence.*;
 @Table(name = "place_first_review", indexes = {
         @Index(name = "index_place_first_review_place_id", columnList = "placeId", unique = true)
 })
+@NoArgsConstructor
+@ToString
 public class PlaceFirstReview {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,5 +28,10 @@ public class PlaceFirstReview {
 
     @Column(length = 36, nullable = false)
     private String reviewId;
+
+    public PlaceFirstReview(MileageRequest request) {
+        this.placeId = request.getPlaceId();
+        this.reviewId = request.getReviewId();
+    }
 
 }
