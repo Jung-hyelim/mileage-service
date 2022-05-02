@@ -1,6 +1,7 @@
 package com.example.mileage.domain;
 
 import com.example.mileage.vo.MileageRequest;
+import com.example.mileage.vo.ReviewEventRequest;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
@@ -30,6 +31,11 @@ public class PlaceFirstReview {
     private String reviewId;
 
     public PlaceFirstReview(MileageRequest request) {
+        this.placeId = request.getPlaceId();
+        this.reviewId = request.getReviewId();
+    }
+
+    public PlaceFirstReview(ReviewEventRequest request) {
         this.placeId = request.getPlaceId();
         this.reviewId = request.getReviewId();
     }

@@ -2,8 +2,8 @@ package com.example.mileage.controller;
 
 import com.example.mileage.dto.TotalMileageDto;
 import com.example.mileage.service.MileageService;
-import com.example.mileage.vo.MileageRequest;
 import com.example.mileage.vo.MileageResponse;
+import com.example.mileage.vo.ReviewEventRequest;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.validation.annotation.Validated;
@@ -20,9 +20,9 @@ public class MileageController {
 
     private final MileageService mileageService;
 
-    @PostMapping({"/v1/mileage", "/events"})
-    public void setMileage(@RequestBody @Valid MileageRequest request) {
-        mileageService.setMileage(request);
+    @PostMapping({"/v1/mileage/review", "/events"})
+    public void setMileage(@RequestBody @Valid ReviewEventRequest request) {
+        mileageService.setReviewMileage(request);
     }
 
     @GetMapping("/v1/mileage/{userId}")

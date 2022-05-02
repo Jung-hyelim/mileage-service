@@ -1,65 +1,43 @@
 package com.example.mileage.domain;
 
-import com.example.mileage.vo.MileageRequest;
+import com.example.mileage.enums.EventType;
+import com.example.mileage.vo.ReviewEventRequest;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 import javax.persistence.*;
-import java.util.List;
-
 
 /**
  * mileage : 마일리지 <br>
- * - 사용자 리뷰의 마일리지 적립 여부를 저장한다. <br>
+ * - 사용자의 이벤트 별 마일리지 내역 <br>
  */
-@Getter
 @NoArgsConstructor
-@ToString
+@Getter
 @Entity
 @Table(name = "mileage", indexes = {
-        @Index(name = "index_mileage_user_id_place_id", columnList = "userId, placeId", unique = true),  // 사용자는 장소마다 리뷰를 1개만 작성 가능
-        @Index(name = "index_mileage_place_id", columnList = "placeId"),
+        @Index(name = "index_mileage_user_id_event_type_event_key", columnList = "userId, eventType, eventKey", unique = true),  // 사용자는 장소마다 리뷰를 1개만 작성 가능
+        @Index(name = "index_mileage_event_type_event_key", columnList = "eventType, eventKey"),
 })
 public class Mileage extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 36, nullable = false)
-    private String userId;
+    @Column(length = 36, nullable = false, updatable = false)
+    private String userId;  // 사용자 id
 
-    @Column(length = 36, nullable = false)
-    private String reviewId;
+    @Enumerated(EnumType.STRING)
+    @Column(length = 12, nullable = false, updatable = false)
+    private EventType eventType;    // 이벤트 타입
 
-    @Column(length = 36, nullable = false)
-    private String placeId;
+    @Column(length = 36, nullable = false, updatable = false)
+    private String eventKey;    // 이벤트 타입별 키 { REVIEW 의 eventKey = reviewId ,,, }
 
-    private Boolean hasContentReview;
+    private boolean isDeleted = false;  // 삭제 여부
 
-    private Boolean hasPhotoReview;
-
-    private Boolean isFirstPlaceReview;
-
-    public Mileage(MileageRequest request, boolean isFirstPlaceReview) {
+    public Mileage(ReviewEventRequest request) {
         this.userId = request.getUserId();
-        this.reviewId = request.getReviewId();
-        this.placeId = request.getPlaceId();
-        this.hasContentReview = hasString(request.getContent());
-        this.hasPhotoReview = hasList(request.getAttachedPhotoIds());
-        this.isFirstPlaceReview = isFirstPlaceReview;
-    }
-
-    public void modifyAction(MileageRequest request) {
-        this.hasContentReview = hasString(request.getContent());
-        this.hasPhotoReview = hasList(request.getAttachedPhotoIds());
-    }
-
-    private boolean hasString(String content) {
-        return !content.isBlank() && content.length() >= 1;
-    }
-
-    private boolean hasList(List list) {
-        return list != null && list.size() >= 1;
+        this.eventType = request.getType();
+        this.eventKey = request.getPlaceId();
     }
 }

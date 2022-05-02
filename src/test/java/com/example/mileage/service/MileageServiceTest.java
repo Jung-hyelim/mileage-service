@@ -4,6 +4,7 @@ import com.example.mileage.dto.TotalMileageDto;
 import com.example.mileage.enums.EventAction;
 import com.example.mileage.enums.EventType;
 import com.example.mileage.vo.MileageRequest;
+import com.example.mileage.vo.ReviewEventRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ class MileageServiceTest {
 
     @Test
     public void 리뷰생성이벤트_저장_테스트() {
-        MileageRequest request = MileageRequest.builder()
+        ReviewEventRequest request = ReviewEventRequest.builder()
                 .type(EventType.REVIEW)
                 .action(EventAction.ADD)
                 .reviewId("review_id_uuid_1")
