@@ -1,10 +1,11 @@
 package com.example.mileage.controller;
 
-import com.example.mileage.dto.MileageDto;
+import com.example.mileage.dto.TotalMileageDto;
 import com.example.mileage.service.MileageService;
-import com.example.mileage.vo.MileageRequest;
 import com.example.mileage.vo.MileageResponse;
+import com.example.mileage.vo.ReviewEventRequest;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,16 +15,19 @@ import javax.validation.Valid;
 @RequiredArgsConstructor
 @Validated
 public class MileageController {
+
+    private static final ModelMapper mapper = new ModelMapper();
+
     private final MileageService mileageService;
 
-    @PostMapping({"/v1/mileages", "/events"})
-    public void setMileages(@RequestBody @Valid MileageRequest request) {
-        mileageService.setMileage(request);
+    @PostMapping({"/v1/mileage/review", "/events"})
+    public void setMileage(@RequestBody @Valid ReviewEventRequest request) {
+        mileageService.setReviewMileage(request);
     }
 
-    @GetMapping("/v1/mileages/{userId}")
-    public MileageResponse getMileages(@PathVariable String userId) {
-        MileageDto mileages = mileageService.getMileages(userId);
-        return null;
+    @GetMapping("/v1/mileage/{userId}")
+    public MileageResponse getMileage(@PathVariable String userId) {
+        TotalMileageDto totalMileage = mileageService.getUserTotalMileage(userId);
+        return mapper.map(totalMileage, MileageResponse.class);
     }
 }

@@ -1,5 +1,10 @@
 package com.example.mileage.domain;
 
+import com.example.mileage.vo.MileageRequest;
+import com.example.mileage.vo.ReviewEventRequest;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
 import javax.persistence.*;
 
 /**
@@ -8,6 +13,8 @@ import javax.persistence.*;
  * - 리뷰 생성 시 place_first_review 에 insert 한다. <br>
  * - insert 성공 시 해당장소의 첫리뷰이므로 보너스 점수 부여 / insert 실패 시 해당장소의 첫리뷰가 아니므로 보너스 점수 부여하지 않는다. <br>
  */
+@NoArgsConstructor
+@ToString
 @Entity
 @Table(name = "place_first_review", indexes = {
         @Index(name = "index_place_first_review_place_id", columnList = "placeId", unique = true)
@@ -22,5 +29,15 @@ public class PlaceFirstReview {
 
     @Column(length = 36, nullable = false)
     private String reviewId;
+
+    public PlaceFirstReview(MileageRequest request) {
+        this.placeId = request.getPlaceId();
+        this.reviewId = request.getReviewId();
+    }
+
+    public PlaceFirstReview(ReviewEventRequest request) {
+        this.placeId = request.getPlaceId();
+        this.reviewId = request.getReviewId();
+    }
 
 }
