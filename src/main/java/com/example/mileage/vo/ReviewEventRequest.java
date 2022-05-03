@@ -35,7 +35,7 @@ public class ReviewEventRequest extends BaseRequest {
     }
 
     public boolean hasContent() {
-        return !content.isBlank() && content.length() >= 1;
+        return content != null &&!content.isBlank() && content.length() >= 1;
     }
 
     public boolean hasPhotos() {

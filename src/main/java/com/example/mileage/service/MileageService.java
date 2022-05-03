@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -82,8 +82,7 @@ public class MileageService {
             point += photoDetail.getPoint();
         }
         if(isFirstPlaceReview) {
-            MileageDetail firstPlaceReviewDetail = new MileageDetail(mileage.getId(), PointType.
-                    FIRST_PLACE);
+            MileageDetail firstPlaceReviewDetail = new MileageDetail(mileage.getId(), PointType.FIRST_PLACE);
             mileageDetailRepository.save(firstPlaceReviewDetail);
             point += firstPlaceReviewDetail.getPoint();
         }
@@ -98,11 +97,59 @@ public class MileageService {
     }
 
     private void modifyReviewMileage(ReviewEventRequest request) {
-        // 기존 마일리지 상세 정보 조회
+        // 기존 마일리지 정보 조회
+        Mileage mileage = mileageRepository.findUserMileage(request.getUserId(), request.getType(), request.getPlaceId()).orElseThrow();
+        log.debug("기존 마일리지 정보 조회 = {}", mileage);
+
+        List<MileageDetail> mileageDetailList = mileageDetailRepository.findAllByMileageId(mileage.getId());
+        log.debug("마일리지 상세 정보 조회 = {}", mileageDetailList.toString());
 
         // 기존 마일리지 상세 정보와 request 정보 비교하여 변화 감지 & 상세 Update
+        int point = 0;
+        Set<PointType> pointTypeSet = new HashSet<>();
+
+        // 있다가 삭제된 경우
+        point += mileageDetailList.stream().mapToInt(mileageDetail -> {
+            pointTypeSet.add(mileageDetail.getPointType());
+
+            int changedPoint = 0;
+            switch (mileageDetail.getPointType()) {
+                case CONTENT:
+                    if(!request.hasContent()) {
+                        changedPoint -= mileageDetail.getPoint();
+                        mileageDetailRepository.deleteById(mileageDetail.getId());
+                    }
+                    break;
+                case PHOTO:
+                    if(!request.hasPhotos()) {
+                        changedPoint -= mileageDetail.getPoint();
+                        mileageDetailRepository.deleteById(mileageDetail.getId());
+                    }
+                    break;
+            }
+            return changedPoint;
+        }).sum();
+        // 없다가 추가된 경우
+        if(!pointTypeSet.contains(PointType.CONTENT) && request.hasContent()) {
+            MileageDetail contentDetail = new MileageDetail(mileage.getId(), PointType.CONTENT);
+            mileageDetailRepository.save(contentDetail);
+            point += contentDetail.getPoint();
+        }
+        if(!pointTypeSet.contains(PointType.PHOTO) && request.hasPhotos()) {
+            MileageDetail photoDetail = new MileageDetail(mileage.getId(), PointType.PHOTO);
+            mileageDetailRepository.save(photoDetail);
+            point += photoDetail.getPoint();
+        }
 
         // 변화에 대한 포인트 증감 히스토리 저장
+        if(point != 0) {
+            MileageHistory mileageHistory = MileageHistory.builder()
+                    .mileageId(mileage.getId())
+                    .action(request.getAction())
+                    .changedPoint(point)
+                    .build();
+            mileageHistoryRepository.save(mileageHistory);
+        }
 
     }
 
