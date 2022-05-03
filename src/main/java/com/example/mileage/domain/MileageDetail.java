@@ -4,6 +4,7 @@ import com.example.mileage.enums.PointType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import javax.persistence.*;
 
@@ -15,8 +16,11 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@ToString
 @Entity
-@Table(name = "mileage_detail")
+@Table(name = "mileage_detail", indexes = {
+        @Index(name = "index_mileage_detail_mileage_id", columnList = "mileageId")
+})
 public class MileageDetail extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

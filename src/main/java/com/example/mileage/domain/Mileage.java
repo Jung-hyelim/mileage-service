@@ -4,6 +4,7 @@ import com.example.mileage.enums.EventType;
 import com.example.mileage.vo.ReviewEventRequest;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import javax.persistence.*;
 
@@ -13,6 +14,7 @@ import javax.persistence.*;
  */
 @NoArgsConstructor
 @Getter
+@ToString
 @Entity
 @Table(name = "mileage", indexes = {
         @Index(name = "index_mileage_user_id_event_type_event_key", columnList = "userId, eventType, eventKey", unique = true),  // 사용자는 장소마다 리뷰를 1개만 작성 가능
@@ -39,5 +41,9 @@ public class Mileage extends BaseTimeEntity {
         this.userId = request.getUserId();
         this.eventType = request.getType();
         this.eventKey = request.getPlaceId();
+    }
+
+    public void delete() {
+        this.isDeleted = true;
     }
 }

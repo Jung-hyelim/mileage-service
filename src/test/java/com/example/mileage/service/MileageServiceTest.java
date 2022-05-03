@@ -3,7 +3,6 @@ package com.example.mileage.service;
 import com.example.mileage.dto.TotalMileageDto;
 import com.example.mileage.enums.EventAction;
 import com.example.mileage.enums.EventType;
-import com.example.mileage.vo.MileageRequest;
 import com.example.mileage.vo.ReviewEventRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -42,7 +41,7 @@ class MileageServiceTest {
     @Test
     public void 리뷰수정이벤트_테스트() {
 
-        MileageRequest request = MileageRequest.builder()
+        ReviewEventRequest request = ReviewEventRequest.builder()
                 .type(EventType.REVIEW)
                 .action(EventAction.ADD)
                 .reviewId("review_id_uuid_1")
@@ -54,7 +53,7 @@ class MileageServiceTest {
 
         mileageService.setMileage(request);
 
-        MileageRequest request2 = MileageRequest.builder()
+        ReviewEventRequest request2 = ReviewEventRequest.builder()
                 .type(EventType.REVIEW)
                 .action(EventAction.MOD)
                 .reviewId("review_id_uuid_1")
@@ -71,7 +70,7 @@ class MileageServiceTest {
     @Test
     public void 리뷰삭제이벤트_테스트() {
 
-        MileageRequest request = MileageRequest.builder()
+        ReviewEventRequest request = ReviewEventRequest.builder()
                 .type(EventType.REVIEW)
                 .action(EventAction.ADD)
                 .reviewId("review_id_uuid_1")
@@ -83,12 +82,10 @@ class MileageServiceTest {
 
         mileageService.setMileage(request);
 
-        MileageRequest request2 = MileageRequest.builder()
+        ReviewEventRequest request2 = ReviewEventRequest.builder()
                 .type(EventType.REVIEW)
                 .action(EventAction.DELETE)
                 .reviewId("review_id_uuid_1")
-//                .content("좋아요!")
-//                .attachedPhotoIds(Arrays.asList("photo_uuid_1", "photo_uuid_2"))
                 .userId("user_id_uuid_1")
                 .placeId("place_id_uuid_1")
                 .build();

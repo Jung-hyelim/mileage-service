@@ -17,6 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -106,13 +108,32 @@ public class MileageService {
 
     private void deleteReviewMileage(ReviewEventRequest request) {
         // 기존 마일리지 정보 조회
+        Mileage mileage = mileageRepository.findUserMileage(request.getUserId(), request.getType(), request.getPlaceId()).orElseThrow();
+        log.debug("기존 마일리지 정보 조회 = {}", mileage);
+
+        List<MileageDetail> mileageDetailList = mileageDetailRepository.findAllByMileageId(mileage.getId());
+        log.debug("마일리지 상세 정보 조회 = {}", mileageDetailList.toString());
 
         // 변화에 대한 포인트 증감 히스토리 저장
+        int point = -1 * mileageDetailList.stream().mapToInt(MileageDetail::getPoint).sum();
+        MileageHistory mileageHistory = MileageHistory.builder()
+                .mileageId(mileage.getId())
+                .action(request.getAction())
+                .changedPoint(point)
+                .build();
+        mileageHistoryRepository.save(mileageHistory);
 
         // 마일리지 삭제처리
+        mileageDetailRepository.deleteAllByMileageId(mileage.getId());
+        mileage.delete();
+        mileageRepository.save(mileage);
 
         // 해당 장소에 대한 리뷰가 없으면 첫장소리뷰 삭제 / 해당 장소에 대한 리뷰가 있으면 삭제하지 않음
-
+        boolean isExistsUniqueEvent = mileageRepository.existsByEventTypeAndEventKeyAndIsDeletedIsFalse(mileage.getEventType(), mileage.getEventKey());
+        if(!isExistsUniqueEvent) {
+            log.debug("첫장소리뷰 삭제 key={}", mileage.getEventKey());
+            placeFirstReviewRepository.deleteByPlaceId(mileage.getEventKey());
+        }
     }
 
     public TotalMileageDto getUserTotalMileage(String userId) {
