@@ -1,0 +1,18 @@
+### 마일리지 적립
+POST http://localhost:8080/events
+Content-Type: application/json
+
+{
+  "type": "REVIEW",
+  "action": "ADD",
+  "reviewId": "review_id",
+  "content": "좋아요!",
+  "attachedPhotoIds": ["photo_id_1", "photo_id_1"],
+  "userId": "user_id",
+  "placeId": "place_id"
+}
+
+### 마일리지 조회
+GET http://localhost:8080/v1/mileage/user_id
+
+###

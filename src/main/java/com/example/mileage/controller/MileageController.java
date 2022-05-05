@@ -22,7 +22,7 @@ public class MileageController {
 
     @PostMapping({"/v1/mileage/review", "/events"})
     public void setMileage(@RequestBody @Valid ReviewEventRequest request) {
-        mileageService.setReviewMileage(request);
+        mileageService.setMileage(request);
     }
 
     @GetMapping("/v1/mileage/{userId}")
