@@ -23,7 +23,7 @@ import java.util.Set;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class ReviewEventService implements EventService {
+public class ReviewEventServiceImpl implements EventService {
 
     private final MileageRepository mileageRepository;
     private final MileageDetailRepository mileageDetailRepository;
