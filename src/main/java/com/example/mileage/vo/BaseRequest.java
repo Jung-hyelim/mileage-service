@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 @Getter
 @Setter
 @ToString
-public class BaseRequest {
+public abstract class BaseRequest {
     @NotNull
     private EventType type;
 
@@ -19,5 +19,7 @@ public class BaseRequest {
 
     @NotNull
     private String userId;
+
+    private String key; // event 의 구분 key 값을 상속받은 Request 에서 지정하여 넣어준다.
 
 }

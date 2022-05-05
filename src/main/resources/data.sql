@@ -1,1 +1,1 @@
-insert into place_first_review (place_id, review_id) values ('place_id_1', 'review_id_1');
+insert into first_event_check (event_type, event_key) values ('REVIEW', 'place_id_uuid_1');

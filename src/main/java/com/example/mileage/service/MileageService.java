@@ -1,15 +1,9 @@
 package com.example.mileage.service;
 
-import com.example.mileage.domain.Mileage;
-import com.example.mileage.domain.MileageDetail;
-import com.example.mileage.domain.MileageHistory;
-import com.example.mileage.domain.PlaceFirstReview;
+import com.example.mileage.domain.*;
 import com.example.mileage.dto.TotalMileageDto;
 import com.example.mileage.enums.PointType;
-import com.example.mileage.repository.MileageDetailRepository;
-import com.example.mileage.repository.MileageHistoryRepository;
-import com.example.mileage.repository.MileageRepository;
-import com.example.mileage.repository.PlaceFirstReviewRepository;
+import com.example.mileage.repository.*;
 import com.example.mileage.vo.BaseRequest;
 import com.example.mileage.vo.ReviewEventRequest;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +23,7 @@ public class MileageService {
     private final MileageRepository mileageRepository;
     private final MileageDetailRepository mileageDetailRepository;
     private final MileageHistoryRepository mileageHistoryRepository;
-    private final PlaceFirstReviewRepository placeFirstReviewRepository;
+    private final FirstEventCheckRepository firstEventCheckRepository;
 
     public void setMileage(BaseRequest request) {
         log.info("baseRequest = {}", request);
@@ -58,7 +52,7 @@ public class MileageService {
         // 최초 장소에 대한 리뷰 Insert -> insert 성공시 보너스 점수 부여 / insert 실패시 보너스점수 없음.
         boolean isFirstPlaceReview = false;
         try {
-            placeFirstReviewRepository.save(new PlaceFirstReview(request));
+            firstEventCheckRepository.save(new FirstEventCheck(request.getType(), request.getKey()));
             isFirstPlaceReview = true;
         } catch (Exception e) {
             isFirstPlaceReview = false;
@@ -98,7 +92,7 @@ public class MileageService {
 
     private void modifyReviewMileage(ReviewEventRequest request) {
         // 기존 마일리지 정보 조회
-        Mileage mileage = mileageRepository.findUserMileage(request.getUserId(), request.getType(), request.getPlaceId()).orElseThrow();
+        Mileage mileage = mileageRepository.findUserMileage(request.getUserId(), request.getType(), request.getKey()).orElseThrow();
         log.debug("기존 마일리지 정보 조회 = {}", mileage);
 
         List<MileageDetail> mileageDetailList = mileageDetailRepository.findAllByMileageId(mileage.getId());
@@ -155,7 +149,7 @@ public class MileageService {
 
     private void deleteReviewMileage(ReviewEventRequest request) {
         // 기존 마일리지 정보 조회
-        Mileage mileage = mileageRepository.findUserMileage(request.getUserId(), request.getType(), request.getPlaceId()).orElseThrow();
+        Mileage mileage = mileageRepository.findUserMileage(request.getUserId(), request.getType(), request.getKey()).orElseThrow();
         log.debug("기존 마일리지 정보 조회 = {}", mileage);
 
         List<MileageDetail> mileageDetailList = mileageDetailRepository.findAllByMileageId(mileage.getId());
@@ -179,7 +173,7 @@ public class MileageService {
         boolean isExistsUniqueEvent = mileageRepository.existsByEventTypeAndEventKeyAndIsDeletedIsFalse(mileage.getEventType(), mileage.getEventKey());
         if(!isExistsUniqueEvent) {
             log.debug("첫장소리뷰 삭제 key={}", mileage.getEventKey());
-            placeFirstReviewRepository.deleteByPlaceId(mileage.getEventKey());
+            firstEventCheckRepository.deleteEvent(mileage.getEventType(), mileage.getEventKey());
         }
     }
 
