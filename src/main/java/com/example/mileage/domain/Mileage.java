@@ -40,7 +40,7 @@ public class Mileage extends BaseTimeEntity {
     public Mileage(ReviewEventRequest request) {
         this.userId = request.getUserId();
         this.eventType = request.getType();
-        this.eventKey = request.getPlaceId();
+        this.eventKey = request.getKey();
     }
 
     public void delete() {

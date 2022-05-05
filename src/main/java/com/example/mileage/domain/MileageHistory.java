@@ -3,6 +3,7 @@ package com.example.mileage.domain;
 import com.example.mileage.enums.EventAction;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
@@ -15,6 +16,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Getter
 @Entity
 @Table(name = "mileage_history")
 public class MileageHistory extends BaseTimeEntity {

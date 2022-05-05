@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface MileageRepository extends JpaRepository<Mileage, Long> {
@@ -14,4 +15,7 @@ public interface MileageRepository extends JpaRepository<Mileage, Long> {
     Optional<Mileage> findUserMileage(@Param("userId") String userId, @Param("eventType") EventType eventType, @Param("eventKey") String eventKey);
 
     boolean existsByEventTypeAndEventKeyAndIsDeletedIsFalse(@Param("eventType") EventType eventType, @Param("eventKey") String eventKey);
+
+    @Query("select m.id from Mileage m where m.userId = :userId")
+    List<Long> findIdsByUserId(String userId);
 }

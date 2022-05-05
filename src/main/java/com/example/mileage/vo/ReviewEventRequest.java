@@ -27,7 +27,7 @@ public class ReviewEventRequest extends BaseRequest {
 
     @Builder
     public ReviewEventRequest(@NotNull EventType type, @NotNull EventAction action, @NotNull String userId, String reviewId, String content, List<String> attachedPhotoIds, String placeId) {
-        super(type, action, userId);
+        super(type, action, userId, placeId);
         this.reviewId = reviewId;
         this.content = content;
         this.attachedPhotoIds = attachedPhotoIds;
