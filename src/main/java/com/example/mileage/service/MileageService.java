@@ -178,8 +178,18 @@ public class MileageService {
     }
 
     public TotalMileageDto getUserTotalMileage(String userId) {
-
         int totalPoint = 0;
+
+        // 사용자의 마일리지 리스트 조회
+        List<Long> userMileageIds = mileageRepository.findIdsByUserId(userId);
+
+        if(userMileageIds != null && !userMileageIds.isEmpty()) {
+            // 사용자의 마일리지 상세 리스트 조회
+            List<MileageDetail> userMileageDetailList = mileageDetailRepository.findAllByMileageIds(userMileageIds);
+
+            // 포인트 계산
+            totalPoint = userMileageDetailList.stream().mapToInt(MileageDetail::getPoint).sum();
+        }
 
         return TotalMileageDto.builder()
                 .userId(userId)
@@ -187,85 +197,4 @@ public class MileageService {
                 .build();
     }
 
-
-    // -----------
-//    private void addMileage(MileageRequest request) {
-//        // 최초 장소에 대한 리뷰 Insert -> insert 성공시 보너스 점수 부여 / insert 실패시 보너스점수 없음.
-//        boolean isFirstPlaceReview = false;
-//        try {
-//            placeFirstReviewRepository.save(new PlaceFirstReview(request));
-//            isFirstPlaceReview = true;
-//        } catch (Exception e) {
-//            isFirstPlaceReview = false;
-//        }
-//
-//        // 마일리지 저장
-//        MileageBack mileageBack = new MileageBack(request, isFirstPlaceReview);
-//        mileageBackRepository.save(mileageBack);
-//        log.debug("신규 마일리지 저장 = {}", mileageBack);
-//
-//        // 마일리지 히스토리 저장
-//        MileageHistoryBack mileageHistoryBack = new MileageHistoryBack(request).calculatePointByAddAction(mileageBack);
-//        mileageHistoryRepository.save(mileageHistoryBack);
-//        log.debug("신규 마일리지 저장 히스토리 저장 = {}", mileageHistoryBack);
-//    }
-//
-//    private void modifyMileage(MileageRequest request) {
-//        // 기존 마일리지 정보 조회
-//        MileageBack mileageBack = mileageBackRepository.findByUserIdAndPlaceIdAndReviewId(request.getUserId(), request.getPlaceId(), request.getReviewId()).orElseThrow();
-//        MileageDto oldMileageDto = mapper.map(mileageBack, MileageDto.class);
-//        log.info("변경 전 마일리지 dto = {}", oldMileageDto);
-//
-//        // 마일리지 수정
-//        mileageBack.modifyAction(request);
-//        mileageBackRepository.save(mileageBack);
-//        log.debug("마일리지 수정 = {}", mileageBack);
-//
-//        // 마일리지 히스토리에 변화된 포인트 저장
-//        MileageHistoryBack mileageHistoryBack = new MileageHistoryBack(request).calculatePointByModAction(oldMileageDto, mileageBack);
-//        if(mileageHistoryBack.isChangedPoint()) {
-//            mileageHistoryRepository.save(mileageHistoryBack);
-//            log.debug("마일리지 수정 히스토리 저장 = {}", mileageHistoryBack);
-//        }
-//    }
-//
-//    private void deleteMileage(MileageRequest request) {
-//        // 기존 마일리지 정보 조회
-//        MileageBack mileageBack = mileageBackRepository.findByUserIdAndPlaceIdAndReviewId(request.getUserId(), request.getPlaceId(), request.getReviewId()).orElseThrow();
-//        log.debug("마일리지 삭제 = {}", mileageBack);
-//
-//        // 마일리지 히스토리에 변화된 포인트 저장
-//        MileageHistoryBack mileageHistoryBack = new MileageHistoryBack(request).calculatePointByDeleteAction(mileageBack);
-//        mileageHistoryRepository.save(mileageHistoryBack);
-//        log.debug("마일리지 삭제 히스토리 저장 = {}", mileageHistoryBack);
-//
-//        // 마일리지 삭제
-//        mileageBackRepository.delete(mileageBack);
-//
-//        // 해당 장소에 대한 리뷰가 없으면 첫장소리뷰 삭제 / 해당 장소에 대한 리뷰가 있으면 삭제하지 않음
-//        boolean existsByPlaceId = mileageBackRepository.existsByPlaceId(mileageBack.getPlaceId());
-//        log.debug("placeId={}, 해당 장소에 리뷰가 있는지 여부={}", mileageBack.getPlaceId(), existsByPlaceId);
-//        if(!existsByPlaceId) {
-//            placeFirstReviewRepository.deleteByPlaceId(mileageBack.getPlaceId());
-//        }
-//    }
-//
-//    public TotalMileageDto getUserTotalMileage(String userId) {
-//        // 마일리지 리스트 조회
-//        List<MileageBack> mileageBackList = mileageBackRepository.findAllByUserId(userId);
-//
-//        // 포인트 계산
-//        int totalPoint = mileageBackList.stream().mapToInt(mileageBack -> {
-//            int point = 0;
-//            if (mileageBack.getHasContentReview()) point += 1;
-//            if (mileageBack.getHasPhotoReview()) point += 1;
-//            if (mileageBack.getIsFirstPlaceReview()) point += 1;
-//            return point;
-//        }).sum();
-//
-//        return TotalMileageDto.builder()
-//                .userId(userId)
-//                .totalPoint(totalPoint)
-//                .build();
-//    }
 }

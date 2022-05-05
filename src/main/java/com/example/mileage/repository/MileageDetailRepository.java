@@ -15,4 +15,7 @@ public interface MileageDetailRepository extends JpaRepository<MileageDetail, Lo
     @Transactional
     @Query("delete from MileageDetail md where md.mileageId = :mileageId")
     void deleteAllByMileageId(Long mileageId);
+
+    @Query("select md from MileageDetail md where md.mileageId in :mileageIds")
+    List<MileageDetail> findAllByMileageIds(Iterable<Long> mileageIds);
 }
