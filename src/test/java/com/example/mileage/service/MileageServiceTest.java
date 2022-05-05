@@ -30,7 +30,6 @@ class MileageServiceTest {
     @Autowired private MileageRepository mileageRepository;
     @Autowired private MileageDetailRepository mileageDetailRepository;
     @Autowired private MileageHistoryRepository mileageHistoryRepository;
-//    @Autowired private PlaceFirstReviewRepository placeFirstReviewRepository;
 
     private final static EventType reviewEventType = EventType.REVIEW;
     private final static String userId = "test_user_id";
