@@ -51,45 +51,41 @@ public class ReviewEventServiceImpl implements EventService {
             isFirstPlaceReview = false;
         }
 
-        try {
-            // 마일리지 저장
-            Mileage mileage = new Mileage(request);
-            mileageRepository.save(mileage);
-
-            int point = 0;
-
-            // 마일리지 상세 저장
-            if (request.hasContent()) {
-                MileageDetail contentDetail = new MileageDetail(mileage.getId(), PointType.CONTENT);
-                mileageDetailRepository.save(contentDetail);
-                point += contentDetail.getPoint();
-            }
-            if (request.hasPhotos()) {
-                MileageDetail photoDetail = new MileageDetail(mileage.getId(), PointType.PHOTO);
-                mileageDetailRepository.save(photoDetail);
-                point += photoDetail.getPoint();
-            }
-            if (isFirstPlaceReview) {
-                MileageDetail firstPlaceReviewDetail = new MileageDetail(mileage.getId(), PointType.FIRST_PLACE);
-                mileageDetailRepository.save(firstPlaceReviewDetail);
-                point += firstPlaceReviewDetail.getPoint();
-            }
-
-            // 마일리지 히스토리 저장
-            MileageHistory mileageHistory = MileageHistory.builder()
-                    .mileageId(mileage.getId())
-                    .action(request.getAction())
-                    .changedPoint(point)
-                    .build();
-            mileageHistoryRepository.save(mileageHistory);
-
-        } catch (DataIntegrityViolationException e) {
-            log.error("DataIntegrityViolationException", e.getMessage());
+        // 기존에 마일리지 정보있는지 중복 조회
+        if(mileageRepository.findUserMileage(request.getUserId(), request.getType(), request.getKey()).isPresent()) {
             throw new CustomException(ErrorCode.DUPLICATE_ENTRY);
-        } catch (Exception e) {
-            log.error("error", e);
-            throw new CustomException(ErrorCode.SERVER_UNKNOWN_ERROR);
         }
+
+        // 마일리지 저장
+        Mileage mileage = new Mileage(request);
+        mileageRepository.save(mileage);
+
+        int point = 0;
+
+        // 마일리지 상세 저장
+        if (request.hasContent()) {
+            MileageDetail contentDetail = new MileageDetail(mileage.getId(), PointType.CONTENT);
+            mileageDetailRepository.save(contentDetail);
+            point += contentDetail.getPoint();
+        }
+        if (request.hasPhotos()) {
+            MileageDetail photoDetail = new MileageDetail(mileage.getId(), PointType.PHOTO);
+            mileageDetailRepository.save(photoDetail);
+            point += photoDetail.getPoint();
+        }
+        if (isFirstPlaceReview) {
+            MileageDetail firstPlaceReviewDetail = new MileageDetail(mileage.getId(), PointType.FIRST_PLACE);
+            mileageDetailRepository.save(firstPlaceReviewDetail);
+            point += firstPlaceReviewDetail.getPoint();
+        }
+
+        // 마일리지 히스토리 저장
+        MileageHistory mileageHistory = MileageHistory.builder()
+                .mileageId(mileage.getId())
+                .action(request.getAction())
+                .changedPoint(point)
+                .build();
+        mileageHistoryRepository.save(mileageHistory);
     }
 
     @Override
