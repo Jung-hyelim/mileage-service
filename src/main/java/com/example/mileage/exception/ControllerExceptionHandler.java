@@ -5,6 +5,7 @@ import com.example.mileage.vo.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -21,7 +22,18 @@ public class ControllerExceptionHandler {
                 .build();
     }
 
-    @ExceptionHandler(CustomException.class)
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(value = MethodArgumentNotValidException.class)
+    protected ErrorResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .code(ErrorCode.INVALID_INPUT_VALUE.getCode())
+                .message(ErrorCode.INVALID_INPUT_VALUE.getMessage())
+                .build();
+        errorResponse.setFieldErrors(e.getFieldErrors());
+        return errorResponse;
+    }
+
+    @ExceptionHandler(value = CustomException.class)
     protected ResponseEntity<ErrorResponse> handleCustomException(CustomException e) {
         ErrorCode errorCode = e.getErrorCode();
         ErrorResponse response = ErrorResponse.builder()
@@ -33,7 +45,7 @@ public class ControllerExceptionHandler {
     }
 
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
-    @ExceptionHandler(Exception.class)
+    @ExceptionHandler(value = Exception.class)
     protected ErrorResponse handleException(Exception e) {
         return ErrorResponse.builder()
                 .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
