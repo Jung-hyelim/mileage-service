@@ -17,7 +17,7 @@ import javax.persistence.*;
 @ToString
 @Entity
 @Table(name = "mileage", indexes = {
-        @Index(name = "index_mileage_user_id_event_type_event_key", columnList = "userId, eventType, eventKey", unique = true),  // 사용자는 장소마다 리뷰를 1개만 작성 가능
+        @Index(name = "index_mileage_user_id_event_type_event_key", columnList = "userId, eventType, eventKey"),
         @Index(name = "index_mileage_event_type_event_key", columnList = "eventType, eventKey"),
 })
 public class Mileage extends BaseTimeEntity {

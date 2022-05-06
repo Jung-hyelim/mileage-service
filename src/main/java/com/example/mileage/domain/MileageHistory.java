@@ -18,7 +18,9 @@ import javax.persistence.*;
 @Builder
 @Getter
 @Entity
-@Table(name = "mileage_history")
+@Table(name = "mileage_history", indexes = {
+        @Index(name = "index_mileage_history_mileage_id", columnList = "mileageId")
+})
 public class MileageHistory extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
