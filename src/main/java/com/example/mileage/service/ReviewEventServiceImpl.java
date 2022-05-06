@@ -73,9 +73,7 @@ public class ReviewEventServiceImpl implements EventService {
         if (isFirstPlaceReview) {
             mileageDetailList.add(new MileageDetail(mileage.getId(), PointType.FIRST_PLACE));
         }
-        mileageDetailList.stream().forEach(mileageDetail -> {
-            mileageDetailRepository.save(mileageDetail);
-        });
+        mileageDetailRepository.saveAll(mileageDetailList);
 
         // 마일리지 히스토리 저장
         int point = mileageDetailList.stream().mapToInt(MileageDetail::getPoint).sum();
