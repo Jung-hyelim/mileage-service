@@ -21,8 +21,9 @@ public class MileageController {
     private final MileageService mileageService;
 
     @PostMapping({"/v1/mileage/review", "/events"})
-    public void setMileage(@RequestBody @Valid ReviewEventRequest request) {
+    public String setMileage(@RequestBody @Valid ReviewEventRequest request) {
         mileageService.setMileage(request);
+        return "SUCCESS";
     }
 
     @GetMapping("/v1/mileage/{userId}")
