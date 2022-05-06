@@ -22,7 +22,7 @@
    > request body  
    > {  
    > "type": "REVIEW",  
-   > "action": "ADD",  
+   > "action": "ADD",  /* "MOD", "DELETE" */  
    > "reviewId": "review_id",  
    > "content": "좋아요!",  
    > "attachedPhotoIds": ["photo_id_1", "photo_id_1"],  
