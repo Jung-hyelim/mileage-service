@@ -4,8 +4,10 @@ import com.example.mileage.domain.FirstEventCheck;
 import com.example.mileage.domain.Mileage;
 import com.example.mileage.domain.MileageDetail;
 import com.example.mileage.domain.MileageHistory;
+import com.example.mileage.enums.ErrorCode;
 import com.example.mileage.enums.EventType;
 import com.example.mileage.enums.PointType;
+import com.example.mileage.exception.CustomException;
 import com.example.mileage.repository.FirstEventCheckRepository;
 import com.example.mileage.repository.MileageDetailRepository;
 import com.example.mileage.repository.MileageHistoryRepository;
@@ -14,6 +16,7 @@ import com.example.mileage.vo.BaseRequest;
 import com.example.mileage.vo.ReviewEventRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -48,36 +51,45 @@ public class ReviewEventServiceImpl implements EventService {
             isFirstPlaceReview = false;
         }
 
-        // 마일리지 저장
-        Mileage mileage = new Mileage(request);
-        mileageRepository.save(mileage);
+        try {
+            // 마일리지 저장
+            Mileage mileage = new Mileage(request);
+            mileageRepository.save(mileage);
 
-        int point = 0;
+            int point = 0;
 
-        // 마일리지 상세 저장
-        if(request.hasContent()) {
-            MileageDetail contentDetail = new MileageDetail(mileage.getId(), PointType.CONTENT);
-            mileageDetailRepository.save(contentDetail);
-            point += contentDetail.getPoint();
-        }
-        if(request.hasPhotos()) {
-            MileageDetail photoDetail = new MileageDetail(mileage.getId(), PointType.PHOTO);
-            mileageDetailRepository.save(photoDetail);
-            point += photoDetail.getPoint();
-        }
-        if(isFirstPlaceReview) {
-            MileageDetail firstPlaceReviewDetail = new MileageDetail(mileage.getId(), PointType.FIRST_PLACE);
-            mileageDetailRepository.save(firstPlaceReviewDetail);
-            point += firstPlaceReviewDetail.getPoint();
-        }
+            // 마일리지 상세 저장
+            if (request.hasContent()) {
+                MileageDetail contentDetail = new MileageDetail(mileage.getId(), PointType.CONTENT);
+                mileageDetailRepository.save(contentDetail);
+                point += contentDetail.getPoint();
+            }
+            if (request.hasPhotos()) {
+                MileageDetail photoDetail = new MileageDetail(mileage.getId(), PointType.PHOTO);
+                mileageDetailRepository.save(photoDetail);
+                point += photoDetail.getPoint();
+            }
+            if (isFirstPlaceReview) {
+                MileageDetail firstPlaceReviewDetail = new MileageDetail(mileage.getId(), PointType.FIRST_PLACE);
+                mileageDetailRepository.save(firstPlaceReviewDetail);
+                point += firstPlaceReviewDetail.getPoint();
+            }
 
-        // 마일리지 히스토리 저장
-        MileageHistory mileageHistory = MileageHistory.builder()
-                .mileageId(mileage.getId())
-                .action(request.getAction())
-                .changedPoint(point)
-                .build();
-        mileageHistoryRepository.save(mileageHistory);
+            // 마일리지 히스토리 저장
+            MileageHistory mileageHistory = MileageHistory.builder()
+                    .mileageId(mileage.getId())
+                    .action(request.getAction())
+                    .changedPoint(point)
+                    .build();
+            mileageHistoryRepository.save(mileageHistory);
+
+        } catch (DataIntegrityViolationException e) {
+            log.error("DataIntegrityViolationException", e.getMessage());
+            throw new CustomException(ErrorCode.DUPLICATE_ENTRY);
+        } catch (Exception e) {
+            log.error("error", e);
+            throw new CustomException(ErrorCode.SERVER_UNKNOWN_ERROR);
+        }
     }
 
     @Override
