@@ -16,9 +16,10 @@ import com.example.mileage.vo.BaseRequest;
 import com.example.mileage.vo.ReviewEventRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -38,9 +39,15 @@ public class ReviewEventServiceImpl implements EventService {
         return EventType.REVIEW;
     }
 
+    @Transactional
     @Override
     public void addEvent(BaseRequest baseRequest) {
         ReviewEventRequest request = (ReviewEventRequest) baseRequest;
+
+        // 기존에 마일리지 정보있는지 중복 조회
+        if(mileageRepository.findUserMileage(request.getUserId(), request.getType(), request.getKey()).isPresent()) {
+            throw new CustomException(ErrorCode.DUPLICATE_ENTRY);
+        }
 
         // 최초 장소에 대한 리뷰 Insert -> insert 성공시 보너스 점수 부여 / insert 실패시 보너스점수 없음.
         boolean isFirstPlaceReview = false;
@@ -51,35 +58,27 @@ public class ReviewEventServiceImpl implements EventService {
             isFirstPlaceReview = false;
         }
 
-        // 기존에 마일리지 정보있는지 중복 조회
-        if(mileageRepository.findUserMileage(request.getUserId(), request.getType(), request.getKey()).isPresent()) {
-            throw new CustomException(ErrorCode.DUPLICATE_ENTRY);
-        }
-
         // 마일리지 저장
         Mileage mileage = new Mileage(request);
         mileageRepository.save(mileage);
 
-        int point = 0;
-
         // 마일리지 상세 저장
+        List<MileageDetail> mileageDetailList = new ArrayList<>();
         if (request.hasContent()) {
-            MileageDetail contentDetail = new MileageDetail(mileage.getId(), PointType.CONTENT);
-            mileageDetailRepository.save(contentDetail);
-            point += contentDetail.getPoint();
+            mileageDetailList.add(new MileageDetail(mileage.getId(), PointType.CONTENT));
         }
         if (request.hasPhotos()) {
-            MileageDetail photoDetail = new MileageDetail(mileage.getId(), PointType.PHOTO);
-            mileageDetailRepository.save(photoDetail);
-            point += photoDetail.getPoint();
+            mileageDetailList.add(new MileageDetail(mileage.getId(), PointType.PHOTO));
         }
         if (isFirstPlaceReview) {
-            MileageDetail firstPlaceReviewDetail = new MileageDetail(mileage.getId(), PointType.FIRST_PLACE);
-            mileageDetailRepository.save(firstPlaceReviewDetail);
-            point += firstPlaceReviewDetail.getPoint();
+            mileageDetailList.add(new MileageDetail(mileage.getId(), PointType.FIRST_PLACE));
         }
+        mileageDetailList.stream().forEach(mileageDetail -> {
+            mileageDetailRepository.save(mileageDetail);
+        });
 
         // 마일리지 히스토리 저장
+        int point = mileageDetailList.stream().mapToInt(MileageDetail::getPoint).sum();
         MileageHistory mileageHistory = MileageHistory.builder()
                 .mileageId(mileage.getId())
                 .action(request.getAction())
@@ -88,6 +87,7 @@ public class ReviewEventServiceImpl implements EventService {
         mileageHistoryRepository.save(mileageHistory);
     }
 
+    @Transactional
     @Override
     public void modifyEvent(BaseRequest baseRequest) {
         ReviewEventRequest request = (ReviewEventRequest) baseRequest;
@@ -147,6 +147,7 @@ public class ReviewEventServiceImpl implements EventService {
         }
     }
 
+    @Transactional
     @Override
     public void deleteEvent(BaseRequest baseRequest) {
         ReviewEventRequest request = (ReviewEventRequest) baseRequest;
@@ -170,7 +171,6 @@ public class ReviewEventServiceImpl implements EventService {
         // 마일리지 삭제처리
         mileageDetailRepository.deleteAllByMileageId(mileage.getId());
         mileage.delete();
-        mileageRepository.save(mileage);
 
         // 해당 장소에 대한 리뷰가 없으면 첫장소리뷰 삭제 / 해당 장소에 대한 리뷰가 있으면 삭제하지 않음
         boolean isExistsUniqueEvent = mileageRepository.existsByEventTypeAndEventKeyAndIsDeletedIsFalse(mileage.getEventType(), mileage.getEventKey());
