@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 
 public enum ErrorCode {
     DUPLICATE_ENTRY(HttpStatus.BAD_REQUEST, 4001, "Duplicate entry"),
+    INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, 4002, "Invalid input value"),
     SERVER_UNKNOWN_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 5001, "Server unknown error"),
     ;
 

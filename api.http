@@ -40,4 +40,13 @@ Content-Type: application/json
 ### 마일리지 조회
 GET http://localhost:8080/v1/mileage/user_id
 
-###
+### 마일리지 적립 - 파라미터 오류 처리 : 필수입력값 userId 가 없음
+POST http://localhost:8080/events
+Content-Type: application/json
+
+{
+  "type": "REVIEW",
+  "action": "ADD",
+  "content": "좋아요!",
+  "placeId": "place_id"
+}

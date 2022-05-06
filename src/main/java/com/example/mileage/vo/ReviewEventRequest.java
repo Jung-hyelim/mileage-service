@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -15,14 +16,14 @@ import java.util.List;
 @ToString
 public class ReviewEventRequest extends BaseRequest {
 
-    @NotNull
     private String reviewId;
 
     private String content;
 
     private List<String> attachedPhotoIds;
 
-    @NotNull
+    @NotNull(message = "placeId는 필수값 입니다.")
+    @Length(max = 36, message = "placeId는 36자까지 입력 가능합니다.")
     private String placeId;
 
     @Builder
