@@ -17,7 +17,6 @@ import com.example.mileage.vo.ReviewEventRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -39,7 +38,6 @@ public class ReviewEventServiceImpl implements EventService {
         return EventType.REVIEW;
     }
 
-    @Transactional
     @Override
     public void addEvent(BaseRequest baseRequest) {
         ReviewEventRequest request = (ReviewEventRequest) baseRequest;
@@ -85,7 +83,6 @@ public class ReviewEventServiceImpl implements EventService {
         mileageHistoryRepository.save(mileageHistory);
     }
 
-    @Transactional
     @Override
     public void modifyEvent(BaseRequest baseRequest) {
         ReviewEventRequest request = (ReviewEventRequest) baseRequest;
@@ -145,7 +142,6 @@ public class ReviewEventServiceImpl implements EventService {
         }
     }
 
-    @Transactional
     @Override
     public void deleteEvent(BaseRequest baseRequest) {
         ReviewEventRequest request = (ReviewEventRequest) baseRequest;
@@ -169,6 +165,7 @@ public class ReviewEventServiceImpl implements EventService {
         // 마일리지 삭제처리
         mileageDetailRepository.deleteAllByMileageId(mileage.getId());
         mileage.delete();
+        mileageRepository.save(mileage);
 
         // 해당 장소에 대한 리뷰가 없으면 첫장소리뷰 삭제 / 해당 장소에 대한 리뷰가 있으면 삭제하지 않음
         boolean isExistsUniqueEvent = mileageRepository.existsByEventTypeAndEventKeyAndIsDeletedIsFalse(mileage.getEventType(), mileage.getEventKey());

@@ -18,7 +18,7 @@ create table mileage (
     user_id varchar(36) not null,
     event_type varchar(12) not null,
     event_key varchar(36) not null,
-    is_deleted bit not null,
+    is_deleted tinyint(1) not null,
     created_time datetime default CURRENT_TIMESTAMP,
     updated_time datetime,
     primary key (id)
